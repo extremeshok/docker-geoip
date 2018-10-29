@@ -42,8 +42,7 @@ RUN \
     curl-dev
 
 # add local files
-COPY etc/ /etc/
-COPY xshok-geoip.sh /xshok-geoip.sh
+COPY rootfs/ /
 
 RUN \
   echo "**** configure ****" \
