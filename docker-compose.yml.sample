@@ -1,0 +1,16 @@
+###### xshokgeoip
+  xshokgeoip:
+    image: extremeshok/geoip
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - vol-geoip-maxmind:/geoip/maxmind
+      - vol-geoip-country-cidr:/geoip/country-cidr
+    restart: always
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=${SYSCTL_IPV6_DISABLED:-0}
+    networks:
+      network:
+        ipv4_address: ${IPV4_NETWORK:-172.22.1}.207
+        aliases:
+          - xshokgeoip

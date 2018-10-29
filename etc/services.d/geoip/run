@@ -1,0 +1,2 @@
+#!/usr/bin/with-contenv sh
+exec /bin/bash /xshok-geoip.sh
