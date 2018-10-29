@@ -1,6 +1,6 @@
 FROM extremeshok/baseimage-alpine:latest AS BUILD
 
-LABEL mantainer="Adrian Kriel <admin@extremeshok.com>" vendor="eXtremeSHOK.com" com.example.version="1.0.2"
+LABEL mantainer="Adrian Kriel <admin@extremeshok.com>" vendor="eXtremeSHOK.com"
 
 RUN \
   echo "**** install bash runtime packages ****" \
