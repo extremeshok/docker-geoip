@@ -1,6 +1,8 @@
 #!/bin/bash
 echo "========== Updating Maxmind GeoIPv2 Databases =========="
 mkdir -p /geoip/maxmind
+mkdir -p /geoip/country-cidr
+
 geoipupdate -v -d /geoip/maxmind
 
 # Deprecated, now we include the last available version
@@ -23,7 +25,7 @@ rsync -a -v --ignore-existing "/usr/share/GeoIP" "/tmp/maxmind-legacy/"
 # fi
 # gunzip /tmp/maxmind-legacy/GeoLiteCity.dat.gz
 
-rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --exclude "*.mmdb" --no-compress "/tmp/maxmind-legacy/" "/geoip/maxmind/"
+#rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --exclude "*.mmdb" --no-compress "/tmp/maxmind-legacy/" "/geoip/maxmind/"
 
 echo "========== Updating nginx-countries =========="
 mkdir -p /tmp/nginx-countries

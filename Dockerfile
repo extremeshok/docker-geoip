@@ -46,9 +46,6 @@ COPY rootfs/ /
 
 RUN \
   echo "**** configure ****" \
-  && mkdir -p /geoip \
-  && mkdir -p /geoip/maxmind \
-  && mkdir -p /geoip/country-cidr \
   && chmod 777 /xshok-geoip.sh
 
 WORKDIR /tmp
