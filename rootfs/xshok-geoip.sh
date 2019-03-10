@@ -1,9 +1,46 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 echo "========== Updating Maxmind GeoIPv2 Databases =========="
 mkdir -p /geoip/maxmind
 mkdir -p /geoip/country-cidr
 
-geoipupdate -v -d /geoip/maxmind
+cat << EOF > /etc/geoip.conf
+
+AccountID ${ACCOUNT_ID:-"0"}
+LicenseKey ${LICENSE_KEY:-"000000000000"}
+EditionIDs ${EDITION_IDS:-"GeoLite2-City GeoLite2-Country"}
+
+# The remaining settings are OPTIONAL.
+
+# The directory to store the database files. Defaults to /usr/local/share/GeoIP
+DatabaseDirectory /geoip/maxmind
+
+# The server to use. Defaults to "updates.maxmind.com".
+Host ${MAXMIND_HOST:-"updates.maxmind.com"}
+
+# The desired protocol either "https" (default) or "http".
+Protocol ${PROTOCOL:-"https"}
+
+# The proxy host name or IP address. You may optionally specify a
+# port number, e.g., 127.0.0.1:8888. If no port number is specified, 1080
+# will be used.
+# Proxy 127.0.0.1:8888
+
+# The user name and password to use with your proxy server.
+# ProxyUserPassword username:password
+
+# Whether to skip host name verification on HTTPS connections.
+# Defaults to "0".
+SkipHostnameVerification ${SKIP_HOSTNAME_VERIFICATION:-"0"}
+
+# Whether to skip peer verification on HTTPS connections.
+# Defaults to "0".
+SkipPeerVerification ${SKIP_PEER_VERIFICATION:-"0"}
+
+EOF
+
+
+geoipupdate -v -f /etc/geoip.conf -d /geoip/maxmind
 
 # Deprecated, now we include the last available version
 rsync -a -v --ignore-existing "/usr/share/GeoIP" "/tmp/maxmind-legacy/"

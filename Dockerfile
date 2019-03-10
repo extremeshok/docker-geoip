@@ -16,30 +16,25 @@ RUN \
 RUN \
   echo "**** install build packages ****" \
   && apk-install build-base \
-    zlib-dev \
-    curl-dev
+  git \
+  go
+
+ENV GEOIP_CONF_FILE /etc/geoip.conf
+ENV GEOIP_DB_DIR /geoip/maxmind
 
 RUN \
   echo "**** install geoipupdate ****" \
   && THISVERSION="$(curl --silent "https://api.github.com/repos/maxmind/geoipupdate/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')" \
-  && echo "$THISVERSION" \
   && THISVERSION="$(echo "$THISVERSION" | sed 's/v//')" \
-  && curl --silent -o /tmp/geoipupdate.tar.gz -L \
-   "https://github.com/maxmind/geoipupdate/releases/download/v${THISVERSION}/geoipupdate-${THISVERSION}.tar.gz" \
-  && mkdir -p /tmp/geoipupdate \
-  && tar xfz /tmp/geoipupdate.tar.gz -C /tmp/geoipupdate \
-  && cd /tmp/geoipupdate/geoipupdate* \
-  && ./configure \
-  && make \
-  && make install \
-  && rm -rf /tmp/geoipupdate \
-  && rm -f /tmp/geoipupdate.tar.gz
+  && echo "$THISVERSION" \
+  && go get -u github.com/maxmind/geoipupdate/cmd/geoipupdate \
+  && mv /root/go/bin/geoipupdate /bin/geoipupdate \
+  && rm -rf /root/go/
 
 RUN \
   echo "**** remove build packages ****" \
-  && apk del --purge build-base \
-    zlib-dev \
-    curl-dev
+  && apk del --purge  build-base  \
+  git
 
 # add local files
 COPY rootfs/ /
