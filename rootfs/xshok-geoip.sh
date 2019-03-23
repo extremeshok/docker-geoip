@@ -44,10 +44,13 @@ geoipupdate -v -f /etc/geoip.conf -d /geoip/maxmind
 #clean lockfile
 rm -f /usr/share/GeoIP/.geoipupdate.lock
 
+# echo "========== Updating Maxmind GeoIP Legacy Databases =========="
+if [ ! -f "/usr/share/GeoIP/GeoIPCity.dat" ] ; then
+  cp -f /usr/share/GeoIP/GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat
+fi
 # Deprecated, now we include the last available version
 rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress  "/usr/share/GeoIP/" "/geoip/maxmind-legacy/"
 
-# echo "========== Updating Maxmind GeoIP Legacy Databases =========="
 # mkdir -p /tmp/maxmind-legacy
 #
 # if [ -f "/tmp/maxmind-legacy/GeoIP.dat.gz" ] && [ -f "/geoip/maxmind/GeoIP.dat" ]; then
