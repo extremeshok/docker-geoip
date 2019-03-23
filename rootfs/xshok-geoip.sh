@@ -49,7 +49,7 @@ if [ ! -f "/usr/share/GeoIP/GeoIPCity.dat" ] ; then
   cp -f /usr/share/GeoIP/GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat
 fi
 # Deprecated, now we include the last available version
-rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress  "/usr/share/GeoIP/" "/geoip/maxmind-legacy/"
+rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress  "/usr/share/GeoIP/" "/geoip/maxmind-legacy"
 
 # mkdir -p /tmp/maxmind-legacy
 #
@@ -78,7 +78,7 @@ else
   curl -o /tmp/nginx-countries.zip -L https://firewalliplists.gypthecat.com/lists/nginx/nginx-countries.conf.zip
 fi
 unzip -q -o -j /tmp/nginx-countries.zip -d /tmp/nginx-countries
-rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress "/tmp/nginx-countries/" "/geoip/country-cidr/"
+rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress "/tmp/nginx-countries/" "/geoip/country-cidr"
 
 echo "========== SLEEPING for 1 day =========="
 sleep 1d
