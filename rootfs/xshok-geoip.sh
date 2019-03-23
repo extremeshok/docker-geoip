@@ -40,14 +40,12 @@ SkipPeerVerification ${SKIP_PEER_VERIFICATION:-"0"}
 
 EOF
 
-
 geoipupdate -v -f /etc/geoip.conf -d /geoip/maxmind
 #clean lockfile
 rm -f /usr/share/GeoIP/.geoipupdate.lock
 
-
 # Deprecated, now we include the last available version
-rsync -a -v --ignore-existing "/usr/share/GeoIP" "/geoip/maxmind-legacy/"
+rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress  "/usr/share/GeoIP/" "/geoip/maxmind-legacy/"
 
 # echo "========== Updating Maxmind GeoIP Legacy Databases =========="
 # mkdir -p /tmp/maxmind-legacy
