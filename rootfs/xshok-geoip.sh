@@ -3,6 +3,7 @@
 echo "========== Updating Maxmind GeoIPv2 Databases =========="
 mkdir -p /geoip/maxmind
 mkdir -p /geoip/country-cidr
+mkdir -p /geoip/maxmind-legacy
 
 cat << EOF > /etc/geoip.conf
 
@@ -41,9 +42,12 @@ EOF
 
 
 geoipupdate -v -f /etc/geoip.conf -d /geoip/maxmind
+#clean lockfile
+rm -f /usr/share/GeoIP/.geoipupdate.lock
+
 
 # Deprecated, now we include the last available version
-rsync -a -v --ignore-existing "/usr/share/GeoIP" "/tmp/maxmind-legacy/"
+rsync -a -v --ignore-existing "/usr/share/GeoIP" "/geoip/maxmind-legacy/"
 
 # echo "========== Updating Maxmind GeoIP Legacy Databases =========="
 # mkdir -p /tmp/maxmind-legacy
