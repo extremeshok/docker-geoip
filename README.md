@@ -10,9 +10,10 @@ nginx-countries by gypthecat
 DB-IP GeoIPv2 Databases
 Legacy GeoIP Databases (updated) provided by https://www.miyuru.lk/geoiplegacy
 IPv6/IPv4 databases, IPv4 address are mapped as IPv6 address.
-Replace maxmind with db-ip databases, but will still use default maxmind filenames
+Emulate maxmind will replace maxmind database files with db-ip database and will use the default maxmind filenames
 
-# Disable
-* DISABLE_MAXMIND=${DISABLE_MAXMIND:-no}
-* DISABLE_LEGACY=${DISABLE_LEGACY:-no}
+# DEFAULTS
+* EMULATE_MAXMIND=${EMULATE_MAXMIND:-yes}
+* DISABLE_DBIP=${DISABLE_DBIP:-no}
+* DISABLE_LEGACY=${DISABLE_LEGACY:-yes}
 * DISABLE_COUNTRY_CIDR=${DISABLE_COUNTRY_CIDR:-no}

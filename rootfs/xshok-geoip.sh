@@ -7,15 +7,14 @@
 ################################################################################
 
 # db-ip.com lite replaces Maxmind GeoIP v2
-REPLACE_MAXMIND=${REPLACE_MAXMIND:-yes}
+EMULATE_MAXMIND=${EMULATE_MAXMIND:-yes}
 
 # DEFAULTS
 DISABLE_DBIP=${DISABLE_DBIP:-no}
-DISABLE_MAXMIND=${DISABLE_MAXMIND:-yes}
 DISABLE_LEGACY=${DISABLE_LEGACY:-yes}
 DISABLE_COUNTRY_CIDR=${DISABLE_COUNTRY_CIDR:-no}
 
-if [ "$REPLACE_MAXMIND" == "yes" ] || [ "$REPLACE_MAXMIND" == "true" ] || [ "$REPLACE_MAXMIND" == "on" ] || [ "$REPLACE_MAXMIND" == "1" ] ; then
+if [ "$EMULATE_MAXMIND" == "yes" ] || [ "$EMULATE_MAXMIND" == "true" ] || [ "$EMULATE_MAXMIND" == "on" ] || [ "$EMULATE_MAXMIND" == "1" ] ; then
   DISABLE_MAXMIND="yes"
 fi
 
@@ -45,10 +44,8 @@ if [ "$DISABLE_DBIP" != "yes" ] && [ "$DISABLE_DBIP" != "true" ] && [ "$DISABLE_
   rsync_output="$(rsync -rtv --delete --delete-excluded --recursive /tmp/dbip/ /geoip/dbip/ --include "*.mmdb" --exclude "*.*" --exclude "GeoLite2-*" )"
   echo "$rsync_output"
 
-  if [ "$REPLACE_MAXMIND" == "yes" ] || [ "$REPLACE_MAXMIND" == "true" ] || [ "$REPLACE_MAXMIND" == "on" ] || [ "$REPLACE_MAXMIND" == "1" ] ; then
+  if [ "$EMULATE_MAXMIND" == "yes" ] || [ "$EMULATE_MAXMIND" == "true" ] || [ "$EMULATE_MAXMIND" == "on" ] || [ "$EMULATE_MAXMIND" == "1" ] ; then
     echo "DB-IP.org replacing Maxmind GeoIPv2"
-    DISABLE_MAXMIND="yes"
-
 
     ln -s /tmp/dbip/dbip-city-lite.mmdb /tmp/dbip/GeoLite2-City.mmdb
     ln -s /tmp/dbip/dbip-country-lite.mmdb /tmp/dbip/GeoLite2-Country.mmdb
@@ -58,48 +55,6 @@ if [ "$DISABLE_DBIP" != "yes" ] && [ "$DISABLE_DBIP" != "true" ] && [ "$DISABLE_
     echo "$rsync_output"
   fi
 
-fi
-
-if [ "$DISABLE_MAXMIND" != "yes" ] && [ "$DISABLE_MAXMIND" != "true" ] && [ "$DISABLE_MAXMIND" != "on" ] && [ "$DISABLE_MAXMIND" != "1" ] ; then
-  echo "========== Updating Maxmind GeoIPv2 Databases =========="
-  mkdir -p /geoip/maxmind
-  cat << EOF > /etc/geoip.conf
-AccountID ${ACCOUNT_ID:-"0"}
-LicenseKey ${LICENSE_KEY:-"000000000000"}
-EditionIDs ${EDITION_IDS:-"GeoLite2-City GeoLite2-Country"}
-
-# The remaining settings are OPTIONAL.
-
-# The directory to store the database files. Defaults to /usr/local/share/GeoIP
-DatabaseDirectory /geoip/maxmind
-
-# The server to use. Defaults to "updates.maxmind.com".
-Host ${MAXMIND_HOST:-"updates.maxmind.com"}
-
-# The desired protocol either "https" (default) or "http".
-Protocol ${PROTOCOL:-"https"}
-
-# The proxy host name or IP address. You may optionally specify a
-# port number, e.g., 127.0.0.1:8888. If no port number is specified, 1080
-# will be used.
-# Proxy 127.0.0.1:8888
-
-# The user name and password to use with your proxy server.
-# ProxyUserPassword username:password
-
-# Whether to skip host name verification on HTTPS connections.
-# Defaults to "0".
-SkipHostnameVerification ${SKIP_HOSTNAME_VERIFICATION:-"0"}
-
-# Whether to skip peer verification on HTTPS connections.
-# Defaults to "0".
-SkipPeerVerification ${SKIP_PEER_VERIFICATION:-"0"}
-
-EOF
-
-  geoipupdate -v -f /etc/geoip.conf -d /geoip/maxmind
-  #clean lockfile
-  rm -f /usr/share/GeoIP/.geoipupdate.lock
 fi
 
 if [ "$DISABLE_LEGACY" != "yes" ] && [ "$DISABLE_LEGACY" != "true" ] && [ "$DISABLE_LEGACY" != "on" ] && [ "$DISABLE_LEGACY" != "1" ] ; then
@@ -127,9 +82,8 @@ if [ "$DISABLE_LEGACY" != "yes" ] && [ "$DISABLE_LEGACY" != "true" ] && [ "$DISA
   rsync_output="$(rsync -rtv --delete --delete-excluded --recursive /tmp/legacy/ /geoip/legacy/ --include "*.dat" --exclude "*.*" --exclude "GeoIP*" --exclude "GeoLiteCity*" )"
   echo "$rsync_output"
 
-  if [ "$REPLACE_MAXMIND" == "yes" ] || [ "$REPLACE_MAXMIND" == "true" ] || [ "$REPLACE_MAXMIND" == "on" ] || [ "$REPLACE_MAXMIND" == "1" ] ; then
+  if [ "$EMULATE_MAXMIND" == "yes" ] || [ "$EMULATE_MAXMIND" == "true" ] || [ "$EMULATE_MAXMIND" == "on" ] || [ "$EMULATE_MAXMIND" == "1" ] ; then
     echo "DB-IP.org replacing Maxmind GeoIPv2"
-    DISABLE_MAXMIND="yes"
 
     ln -s /tmp/legacy/dbip-city.dat /tmp/legacy/GeoLiteCity.dat
     ln -s /tmp/legacy/dbip-country.dat /tmp/legacy/GeoIP.dat

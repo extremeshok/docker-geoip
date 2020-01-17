@@ -5,6 +5,9 @@
       - TZ=${TZ}
     volumes:
       - vol-geoip-maxmind:/geoip/maxmind
+      - vol-geoip-maxmind-legacy:/geoip/maxmind-legacy
+      - vol-geoip-dbip:/geoip/dbip
+      - vol-geoip-legacy:/geoip/legacy
       - vol-geoip-country-cidr:/geoip/country-cidr
     restart: always
     sysctls:
