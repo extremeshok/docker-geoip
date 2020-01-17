@@ -1,8 +1,64 @@
 #!/usr/bin/env bash
 
-DISABLE_MAXMIND=${DISABLE_MAXMIND:-no}
-DISABLE_MAXMIND_LEGACY=${DISABLE_MAXMIND_LEGACY:-yes}
+################################################################################
+# This is property of eXtremeSHOK.com
+# You are free to use, modify and distribute, however you may not remove this notice.
+# Copyright (c) Adrian Jon Kriel :: admin@extremeshok.com
+################################################################################
+
+# db-ip.com lite replaces Maxmind GeoIP v2
+REPLACE_MAXMIND=${REPLACE_MAXMIND:-yes}
+
+# DEFAULTS
+DISABLE_DBIP=${DISABLE_DBIP:-no}
+DISABLE_MAXMIND=${DISABLE_MAXMIND:-yes}
+DISABLE_LEGACY=${DISABLE_LEGACY:-yes}
 DISABLE_COUNTRY_CIDR=${DISABLE_COUNTRY_CIDR:-no}
+
+if [ "$REPLACE_MAXMIND" == "yes" ] || [ "$REPLACE_MAXMIND" == "true" ] || [ "$REPLACE_MAXMIND" == "on" ] || [ "$REPLACE_MAXMIND" == "1" ] ; then
+  DISABLE_MAXMIND="yes"
+fi
+
+if [ "$DISABLE_DBIP" != "yes" ] && [ "$DISABLE_DBIP" != "true" ] && [ "$DISABLE_DBIP" != "on" ] && [ "$DISABLE_DBIP" != "1" ] ; then
+
+  echo "========== Updating DB-IP Databases =========="
+
+  mkdir -p /tmp/dbip
+  cd /tmp || exit
+
+  if [ -f "/tmp/dbip-country-lite.mmdb.gz" ]; then
+    curl -o /tmp/dbip-country-lite.mmdb.gz -z /tmp/dbip-country-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz"
+  else
+    curl -o /tmp/dbip-country-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz"
+  fi
+  if [ -f "/tmp/dbip-city-lite.mmdb.gz" ]; then
+    curl -o /tmp/dbip-city-lite.mmdb.gz -z /tmp/dbip-city-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-city-lite-$(date +%Y-%m).mmdb.gz"
+  else
+    curl -o /tmp/dbip-city-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-city-lite-$(date +%Y-%m).mmdb.gz"
+  fi
+
+  for i in dbip-*.mmdb.gz ; do
+    gzip -dkc < $i > /tmp/dbip/${i%%.gz}
+  done
+
+  mkdir -p /geoip/dbip
+  rsync_output="$(rsync -rtv --delete --delete-excluded --recursive /tmp/dbip/ /geoip/dbip/ --include "*.mmdb" --exclude "*.*" --exclude "GeoLite2-*" )"
+  echo "$rsync_output"
+
+  if [ "$REPLACE_MAXMIND" == "yes" ] || [ "$REPLACE_MAXMIND" == "true" ] || [ "$REPLACE_MAXMIND" == "on" ] || [ "$REPLACE_MAXMIND" == "1" ] ; then
+    echo "DB-IP.org replacing Maxmind GeoIPv2"
+    DISABLE_MAXMIND="yes"
+
+
+    ln -s /tmp/dbip/dbip-city-lite.mmdb /tmp/dbip/GeoLite2-City.mmdb
+    ln -s /tmp/dbip/dbip-country-lite.mmdb /tmp/dbip/GeoLite2-Country.mmdb
+
+    mkdir -p /geoip/maxmind
+    rsync_output="$(rsync -rtv --delete --delete-excluded --recursive /tmp/dbip/ /geoip/maxmind/ --include "*.mmdb" --exclude "*.*" --exclude "dbip-*")"
+    echo "$rsync_output"
+  fi
+
+fi
 
 if [ "$DISABLE_MAXMIND" != "yes" ] && [ "$DISABLE_MAXMIND" != "true" ] && [ "$DISABLE_MAXMIND" != "on" ] && [ "$DISABLE_MAXMIND" != "1" ] ; then
   echo "========== Updating Maxmind GeoIPv2 Databases =========="
@@ -46,34 +102,43 @@ EOF
   rm -f /usr/share/GeoIP/.geoipupdate.lock
 fi
 
-if [ "$DISABLE_MAXMIND_LEGACY" != "yes" ] && [ "$DISABLE_MAXMIND_LEGACY" != "true" ] && [ "$DISABLE_MAXMIND_LEGACY" != "on" ] && [ "$DISABLE_MAXMIND_LEGACY" != "1" ] ; then
-  echo "========== Updating Maxmind GeoIP Legacy Databases =========="
-  mkdir -p /geoip/maxmind-legacy
-  if [ ! -f "/usr/share/GeoIP/GeoIPCity.dat" ] ; then
-    cp -f /usr/share/GeoIP/GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat
+if [ "$DISABLE_LEGACY" != "yes" ] && [ "$DISABLE_LEGACY" != "true" ] && [ "$DISABLE_LEGACY" != "on" ] && [ "$DISABLE_LEGACY" != "1" ] ; then
+  echo "========== Updating GeoIP Legacy Databases from  https://www.miyuru.lk/geoiplegacy =========="
+
+  mkdir -p /tmp/legacy
+  cd /tmp || exit
+
+  if [ -f "/tmp/dbip-country.dat.gz" ]; then
+    curl -o /tmp/dbip-country.dat.gz -z /tmp/GeoIP.dat.gz -L "https://dl.miyuru.lk/geoip/dbip/country/dbip.dat.gz"
+  else
+    curl -o /tmp/dbip-country.dat.gz -L "https://dl.miyuru.lk/geoip/dbip/country/dbip.dat.gz"
   fi
-  # Deprecated, now we include the last available version
-  rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --delete --delete-excluded --no-compress  "/usr/share/GeoIP/" "/geoip/maxmind-legacy"
+  if [ -f "/tmp/dbip-city.dat.gz" ]; then
+    curl -o /tmp/dbip-city.dat.gz -z /tmp/dbip-city.dat.gz -L "https://dl.miyuru.lk/geoip/dbip/city/dbip.dat.gz"
+  else
+    curl -o /tmp/dbip-city.dat.gz -L "https://dl.miyuru.lk/geoip/dbip/city/dbip.dat.gz"
+  fi
 
-  # mkdir -p /tmp/maxmind-legacy
-  #
-  # if [ -f "/tmp/maxmind-legacy/GeoIP.dat.gz" ] && [ -f "/geoip/maxmind/GeoIP.dat" ]; then
-  #   curl -o /tmp/maxmind-legacy/GeoIP.dat.gz -z /tmp/maxmind-legacy/GeoIP.dat.gz -L http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-  # else
-  #   curl -o /tmp/maxmind-legacy/GeoIP.dat.gz -L http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-  # fi
-  # gunzip /tmp/maxmind-legacy/GeoIP.dat.gz
-  #
-  # if [ -f "/tmp/maxmind-legacy/GeoLiteCity.dat.gz" ] && [ -f "/geoip/maxmind/GeoLiteCity.dat" ]; then
-  #   curl -o /tmp/maxmind-legacy/GeoLiteCity.dat.gz -z /tmp/maxmind-legacy/GeoLiteCity.dat.gz -L http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-  # else
-  #   curl -o /tmp/maxmind-legacy/GeoLiteCity.dat.gz -L http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-  # fi
-  # gunzip /tmp/maxmind-legacy/GeoLiteCity.dat.gz
+  for i in dbip-*.dat.gz ; do
+    gzip -dkc < $i > /tmp/legacy/${i%%.gz}
+  done
 
-  #rsync -W -h -r -L -p -t -g -o -i --prune-empty-dirs --exclude "*.mmdb" --no-compress "/tmp/maxmind-legacy/" "/geoip/maxmind/"
+  mkdir -p /geoip/legacy
+  rsync_output="$(rsync -rtv --delete --delete-excluded --recursive /tmp/legacy/ /geoip/legacy/ --include "*.dat" --exclude "*.*" --exclude "GeoIP*" --exclude "GeoLiteCity*" )"
+  echo "$rsync_output"
+
+  if [ "$REPLACE_MAXMIND" == "yes" ] || [ "$REPLACE_MAXMIND" == "true" ] || [ "$REPLACE_MAXMIND" == "on" ] || [ "$REPLACE_MAXMIND" == "1" ] ; then
+    echo "DB-IP.org replacing Maxmind GeoIPv2"
+    DISABLE_MAXMIND="yes"
+
+    ln -s /tmp/legacy/dbip-city.dat /tmp/legacy/GeoLiteCity.dat
+    ln -s /tmp/legacy/dbip-country.dat /tmp/legacy/GeoIP.dat
+
+    mkdir -p /geoip/maxmind-legacy
+    rsync_output="$(rsync -rtv --delete --delete-excluded --recursive /tmp/legacy/ /geoip/maxmind-legacy/ --include "*.dat" --exclude "*.*" --exclude "dbip-*")"
+    echo "$rsync_output"
+  fi
 fi
-
 
 if [ "$DISABLE_COUNTRY_CIDR" != "yes" ] && [ "$DISABLE_COUNTRY_CIDR" != "true" ] && [ "$DISABLE_COUNTRY_CIDR" != "on" ] && [ "$DISABLE_COUNTRY_CIDR" != "1" ] ; then
   mkdir -p /geoip/country-cidr
