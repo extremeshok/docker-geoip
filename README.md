@@ -14,6 +14,7 @@ Emulate maxmind will replace maxmind database files with db-ip database and will
 
 # DEFAULTS
 * EMULATE_MAXMIND=${EMULATE_MAXMIND:-yes}
+* DISABLE_ASN=${DISABLE_ASN:-no}
 * DISABLE_DBIP=${DISABLE_DBIP:-no}
 * DISABLE_LEGACY=${DISABLE_LEGACY:-yes}
 * DISABLE_COUNTRY_CIDR=${DISABLE_COUNTRY_CIDR:-no}
