@@ -10,6 +10,7 @@
 EMULATE_MAXMIND=${EMULATE_MAXMIND:-yes}
 
 # DEFAULTS
+DISABLE_ASN=${DISABLE_ASN:-no}
 DISABLE_DBIP=${DISABLE_DBIP:-no}
 DISABLE_LEGACY=${DISABLE_LEGACY:-yes}
 DISABLE_COUNTRY_CIDR=${DISABLE_COUNTRY_CIDR:-no}
@@ -25,6 +26,11 @@ if [ "$DISABLE_DBIP" != "yes" ] && [ "$DISABLE_DBIP" != "true" ] && [ "$DISABLE_
   mkdir -p /tmp/dbip
   cd /tmp || exit
 
+  if [ -f "/tmp/dbip-asn-lite.mmdb.gz" ]; then
+    curl -o /tmp/dbip-asn-lite.mmdb.gz -z /tmp/dbip-asn-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz"
+  else
+    curl -o /tmp/dbip-asn-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz"
+  fi
   if [ -f "/tmp/dbip-country-lite.mmdb.gz" ]; then
     curl -o /tmp/dbip-country-lite.mmdb.gz -z /tmp/dbip-country-lite.mmdb.gz -L "https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz"
   else
@@ -47,6 +53,7 @@ if [ "$DISABLE_DBIP" != "yes" ] && [ "$DISABLE_DBIP" != "true" ] && [ "$DISABLE_
   if [ "$EMULATE_MAXMIND" == "yes" ] || [ "$EMULATE_MAXMIND" == "true" ] || [ "$EMULATE_MAXMIND" == "on" ] || [ "$EMULATE_MAXMIND" == "1" ] ; then
     echo "DB-IP.org replacing Maxmind GeoIPv2"
 
+    ln -s /tmp/dbip/dbip-asn-lite.mmdb /tmp/dbip/GeoLite2-ASN.mmdb
     ln -s /tmp/dbip/dbip-city-lite.mmdb /tmp/dbip/GeoLite2-City.mmdb
     ln -s /tmp/dbip/dbip-country-lite.mmdb /tmp/dbip/GeoLite2-Country.mmdb
 
